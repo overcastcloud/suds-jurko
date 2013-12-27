@@ -691,6 +691,26 @@ def test_wrapped_parameter():
 </SOAP-ENV:Envelope>""" % data)
 
 
+def test_too_many_parameters_handling():
+    """Too many arguments should be rejected."""
+    service_from_wsdl = lambda wsdl: \
+        tests.client_from_wsdl(wsdl, nosend=True, prettyxml=True).service
+
+    service = service_from_wsdl(tests.wsdl_input("""\
+      <xsd:element name="Wrapper">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="a" type="xsd:integer" />
+            <xsd:element name="b" type="xsd:integer" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>""", "Wrapper"))
+
+    print pytest.raises(TypeError, service.f, 1, 2, 3)
+    print pytest.raises(TypeError, service.f, 1, 2, c=3)
+    print pytest.raises(TypeError, service.f, a=1, b=2, c=3)
+
+
 def _check_request(request, expected_xml):
     tests.compare_xml_to_string(request.original_envelope, expected_xml)
 

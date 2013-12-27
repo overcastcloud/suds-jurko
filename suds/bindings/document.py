@@ -61,13 +61,13 @@ class Document(Binding):
             root = self.document(pts[0])
         else:
             root = []
-        n = 0
+        args = list(args)
         for pd in self.param_defs(method):
-            if n < len(args):
-                value = args[n]
+            if args:
+                value = args.pop(0)
             else:
-                value = kwargs.get(pd[0])
-            n += 1
+                value = kwargs.pop(pd[0], None)
+
             # Skip non-existing by-choice arguments.
             # Implementation notes:
             #   * This functionality might be better placed inside the
@@ -85,6 +85,13 @@ class Document(Binding):
                 ns = pd[1].namespace('ns0')
                 p.setPrefix(ns[0], ns[1])
             root.append(p)
+        if kwargs:
+            raise TypeError("%s() got an unexpected keyword argument '%s'" %
+                            (method.name, kwargs.keys()[0]))
+        if args:
+            params = self.param_defs(method)
+            raise TypeError("%s() takes at most %d arguments (%d given)" %
+                            (method.name, len(params), len(params) + len(args)))
         return root
 
     def replycontent(self, method, body):
