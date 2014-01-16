@@ -288,7 +288,7 @@ def test_fault_reply_with_unicode_faultstring(monkeypatch):
     client = tests.client_from_wsdl(_wsdl__simple, faults=True)
     inject = dict(reply=fault_xml, status=httplib.INTERNAL_SERVER_ERROR)
     e = pytest.raises(suds.WebFault, client.service.f, __inject=inject).value
-    e.fault.faultstring = unicode_string
+    assert e.fault.faultstring == unicode_string
     assert e.document.__class__ is suds.sax.document.Document
 
     client = tests.client_from_wsdl(_wsdl__simple, faults=False)
